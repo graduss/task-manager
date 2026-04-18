@@ -7,6 +7,7 @@ mod user;
 use dotenvy::dotenv;
 use anyhow::Result;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -22,7 +23,9 @@ async fn main() -> Result<()> {
     let database_url = std::env::var("DATABASE_URL").map_err(|_| anyhow::anyhow!("DATABASE_URL must be set"))?;
     let db_pool = db::create_db_pool(&database_url).await?;
 
-    let app = app::create_app(app::AppState { db_pool });
+    let app = app::create_app(app::AppState { db_pool })
+        .layer(TraceLayer::new_for_http())
+        .layer(CorsLayer::permissive());
 
     let addr = std::env::var("APP_ADDR").unwrap_or_else(|_| "0.0.0.0:3000".into());
     let listener = tokio::net::TcpListener::bind(&addr).await?;
