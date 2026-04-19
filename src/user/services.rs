@@ -34,3 +34,17 @@ pub async fn create_user(db_pool: &DbPool, new_user: NewUser) -> Result<UserResp
 
   Ok(user.into())
 }
+
+pub async fn find_user_by_email(db_pool: &DbPool, email: &str) -> Result<Option<User>, AppError> {
+  let user: Option<User> = sqlx::query_as!(
+    User,
+    r#"
+    SELECT * FROM users WHERE email = $1
+    "#,
+    email
+  )
+  .fetch_optional(db_pool)
+  .await?;
+
+  Ok(user)
+}

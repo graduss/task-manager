@@ -13,6 +13,13 @@ pub struct RegisterUserRequest {
   pub password: String,
 }
 
+#[derive(Deserialize, Validate)]
+pub struct LoginUserRequest {
+  #[validate(email)]
+  pub email: String,
+  pub password: String,
+}
+
 #[derive(Serialize)]
 pub struct AuthResponse {
   pub token: String,
