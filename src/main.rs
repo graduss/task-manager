@@ -6,7 +6,8 @@ mod db;
 mod auth;
 mod errors;
 mod user;
-mod meddelware;
+mod middlewares;
+mod task;
 
 use dotenvy::dotenv;
 use anyhow::Result;
