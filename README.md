@@ -120,6 +120,7 @@ cargo check       # type-check
 cargo test        # run tests
 cargo clippy      # lint
 cargo fmt         # format
+cargo doc --open  # documentation
 ```
 
 > `DATABASE_URL` must be set before `cargo build` / `cargo check` — SQLx verifies SQL queries against the live database at compile time.
