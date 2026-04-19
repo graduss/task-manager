@@ -1,3 +1,5 @@
+//! HTTP handlers for auth routes: deserialise, validate, delegate to services.
+
 use axum::{extract::State, Json};
 use validator::Validate;
 
@@ -12,6 +14,7 @@ use super::models::{
   AuthResponse
 };
 
+/// `POST /api/auth/register` — validates the request body and registers a new user.
 pub async fn register_user(
   State(app_state): State<AppState>,
   Json(payload): Json<RegisterUserRequest>
@@ -23,6 +26,7 @@ pub async fn register_user(
   Ok(Json(AuthResponse { token, user }))
 }
 
+/// `POST /api/auth/login` — validates the request body and authenticates an existing user.
 pub async fn login_user(
   State(app_state): State<AppState>,
   Json(payload): Json<LoginUserRequest>

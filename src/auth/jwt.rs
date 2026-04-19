@@ -1,9 +1,14 @@
+//! JWT creation and decoding. Tokens are HMAC-signed, expire after 24 hours,
+//! and carry the user's UUID as the `sub` claim.
+
 use uuid::Uuid;
 use jsonwebtoken::{encode, EncodingKey, Header, DecodingKey, Validation, decode};
 use std::env;
 
 use super::models::Claims;
 
+/// Mints a JWT for the given user ID. The token expires in 24 hours and is
+/// signed with the `JWT_SECRET` environment variable using HMAC-SHA256.
 pub fn create_jwt(user_id: Uuid) -> anyhow::Result<String> {
   let secret = env::var("JWT_SECRET")
     .map_err(|_| anyhow::anyhow!("JWT_SECRET must be set in environment variables"))?;
@@ -20,6 +25,7 @@ pub fn create_jwt(user_id: Uuid) -> anyhow::Result<String> {
   Ok(token)
 }
 
+/// Decodes and validates a JWT string, returning the [`Claims`] on success.
 pub fn decode_jwt(token: &str) -> anyhow::Result<Claims> {
   let secret = env::var("JWT_SECRET")
     .map_err(|_| anyhow::anyhow!("JWT_SECRET must be set in environment variables"))?;

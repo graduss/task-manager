@@ -1,3 +1,7 @@
+//! Centralised error handling. [`AppError`] covers all failure modes and implements
+//! [`IntoResponse`] to emit structured JSON with the appropriate HTTP status code.
+//! [`AppResult<T>`] is a convenience alias used across handlers and services.
+
 use axum::{
   http::StatusCode,
   response::{IntoResponse, Response},
@@ -27,6 +31,7 @@ pub enum AppError {
 }
 
 impl IntoResponse for AppError {
+  /// Maps each error variant to an HTTP status code and a JSON `{ "error": "..." }` body.
   fn into_response(self) -> Response {
     let (status, error_message) = match self {
       AppError::NotFound(message) => (StatusCode::NOT_FOUND, message.clone()),

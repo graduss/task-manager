@@ -1,3 +1,5 @@
+//! Request and response types for the auth module.
+
 use uuid::Uuid;
 use serde::{Deserialize, Serialize};
 use validator::Validate;

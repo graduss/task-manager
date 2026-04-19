@@ -1,3 +1,6 @@
+//! User module: data models, database queries, and the authenticated user endpoint.
+//! Exposes types and service functions consumed by other modules.
+
 mod models;
 mod services;
 mod handlers;

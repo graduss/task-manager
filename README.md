@@ -72,7 +72,46 @@ Register a new user.
 }
 ```
 
-**Error responses** return JSON `{ "error": "<message>" }` with appropriate status codes (400, 409, 500).
+---
+
+### `POST /api/auth/login`
+
+Authenticate an existing user.
+
+**Request:**
+```json
+{
+  "email": "alice@example.com",
+  "password": "secret123"
+}
+```
+
+**Response `200`:** same shape as `/register`.
+
+**Error responses:** `401` on invalid credentials.
+
+---
+
+### `GET /api/users/me`
+
+Return the currently authenticated user. Requires `Authorization: Bearer <token>` header.
+
+**Response `200`:**
+```json
+{
+  "id": "<uuid>",
+  "username": "alice",
+  "email": "alice@example.com",
+  "created_at": "...",
+  "updated_at": "..."
+}
+```
+
+**Error responses:** `401` if token is missing, invalid, or user no longer exists.
+
+---
+
+**All error responses** return JSON `{ "error": "<message>" }` with appropriate status codes (400, 401, 409, 500).
 
 ## Development
 

@@ -1,3 +1,7 @@
+//! Axum middleware for JWT authentication. Extracts the `Authorization: Bearer <token>`
+//! header, decodes the JWT, loads the matching user from the database, and injects a
+//! [`UserResponse`] extension into the request for downstream handlers.
+
 use axum::{
   extract::{Request, State},
   middleware::Next,
@@ -11,6 +15,9 @@ use crate::{
   user::{ find_user_by_id, UserResponse },
 };
 
+/// Middleware that authenticates the request by validating the `Authorization: Bearer` token,
+/// then injects the resolved [`UserResponse`] as a request extension.
+/// Returns `401 Unauthorized` if the token is missing, invalid, or the user no longer exists.
 pub async fn get_current_user(
   State(app_state): State<AppState>,
   mut req: Request,

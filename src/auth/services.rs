@@ -1,3 +1,5 @@
+//! Business logic for registration and login: password hashing/verification and JWT minting.
+
 use bcrypt::{hash, DEFAULT_COST, verify};
 use crate::{
   app::AppState,
@@ -11,6 +13,7 @@ use super::{
 };
 
 
+/// Hashes the password, inserts the new user, and returns a JWT with the user payload.
 pub async fn register_user(
   app_state: &AppState,
   payload: &RegisterUserRequest
@@ -29,6 +32,7 @@ pub async fn register_user(
   Ok((token, user_response))
 }
 
+/// Looks up the user by email, verifies the bcrypt hash, and returns a JWT with the user payload.
 pub async fn login_user(
   app_state: &AppState,
   payload: &LoginUserRequest

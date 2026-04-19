@@ -1,6 +1,9 @@
+//! Mounts `POST /auth/register` and `POST /auth/login`.
+
 use axum::{ Router, routing::post };
 use crate::app::AppState;
 
+/// Builds the auth sub-router with registration and login routes.
 pub fn create_router() -> Router<AppState> {
     Router::new()
       .route(

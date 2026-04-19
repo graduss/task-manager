@@ -1,3 +1,5 @@
+//! User data models. [`UserResponse`] omits `password_hash` and is safe to serialise in API responses.
+
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

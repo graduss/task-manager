@@ -1,3 +1,5 @@
+//! Database operations for users: insert, lookup by email, lookup by ID.
+
 use uuid::Uuid;
 
 use super::models::{NewUser, User, UserResponse};
@@ -6,6 +8,8 @@ use crate::{
   errors::AppError,
 };
 
+/// Inserts a new user after checking for duplicate username or email.
+/// Returns `AppError::Conflict` if either already exists.
 pub async fn create_user(db_pool: &DbPool, new_user: NewUser) -> Result<UserResponse, AppError> {
   let exists = sqlx::query_scalar!(
     r#"
@@ -37,6 +41,7 @@ pub async fn create_user(db_pool: &DbPool, new_user: NewUser) -> Result<UserResp
   Ok(user.into())
 }
 
+/// Looks up a user by email address. Returns `None` if no match is found.
 pub async fn find_user_by_email(db_pool: &DbPool, email: &str) -> Result<Option<User>, AppError> {
   let user: Option<User> = sqlx::query_as!(
     User,
@@ -51,6 +56,7 @@ pub async fn find_user_by_email(db_pool: &DbPool, email: &str) -> Result<Option<
   Ok(user)
 }
 
+/// Looks up a user by UUID. Returns `None` if no match is found.
 pub async fn find_user_by_id(db_pool: &DbPool, id: Uuid) -> Result<Option<User>, AppError> {
   let user: Option<User> = sqlx::query_as!(
     User,

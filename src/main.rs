@@ -1,3 +1,6 @@
+//! Application entry point. Loads environment variables, initialises tracing,
+//! creates the database pool, attaches middleware, and starts the HTTP listener.
+
 mod app;
 mod db;
 mod auth;

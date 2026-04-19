@@ -1,3 +1,6 @@
+//! Authentication module: user registration, login, and JWT issuance.
+//! Exposes [`decode_jwt`] for use by middleware.
+
 pub mod router;
 mod handlers;
 mod models;
