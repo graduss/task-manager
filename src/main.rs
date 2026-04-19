@@ -3,6 +3,7 @@ mod db;
 mod auth;
 mod errors;
 mod user;
+mod meddelware;
 
 use dotenvy::dotenv;
 use anyhow::Result;

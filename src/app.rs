@@ -1,5 +1,8 @@
 use axum::{Router};
-use crate::auth;
+use crate::{
+  auth,
+  user,
+};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -9,5 +12,6 @@ pub struct AppState {
 pub fn create_app(app_state: AppState) -> Router {
     Router::new()
     .nest("/api", auth::router::create_router())
+    .nest("/api", user::router::create_router(app_state.clone()))
     .with_state(app_state)
 }

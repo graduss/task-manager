@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 use super::models::{NewUser, User, UserResponse};
 use crate::{
   db::DbPool,
@@ -42,6 +44,20 @@ pub async fn find_user_by_email(db_pool: &DbPool, email: &str) -> Result<Option<
     SELECT * FROM users WHERE email = $1
     "#,
     email
+  )
+  .fetch_optional(db_pool)
+  .await?;
+
+  Ok(user)
+}
+
+pub async fn find_user_by_id(db_pool: &DbPool, id: Uuid) -> Result<Option<User>, AppError> {
+  let user: Option<User> = sqlx::query_as!(
+    User,
+    r#"
+    SELECT * FROM users WHERE id = $1
+    "#,
+    id
   )
   .fetch_optional(db_pool)
   .await?;

@@ -1,5 +1,5 @@
 use uuid::Uuid;
-use jsonwebtoken::{encode, EncodingKey, Header};
+use jsonwebtoken::{encode, EncodingKey, Header, DecodingKey, Validation, decode};
 use std::env;
 
 use super::models::Claims;
@@ -18,4 +18,17 @@ pub fn create_jwt(user_id: Uuid) -> anyhow::Result<String> {
     .map_err(|e| anyhow::anyhow!("Failed to create JWT token: {}", e))?;
   
   Ok(token)
+}
+
+pub fn decode_jwt(token: &str) -> anyhow::Result<Claims> {
+  let secret = env::var("JWT_SECRET")
+    .map_err(|_| anyhow::anyhow!("JWT_SECRET must be set in environment variables"))?;
+
+  let token_data = decode::<Claims>(
+    token,
+    &DecodingKey::from_secret(secret.as_bytes()),
+    &Validation::default()
+  ).map_err(|e| anyhow::anyhow!("Failed to decode JWT token: {}", e))?;
+  
+  Ok(token_data.claims)
 }

@@ -1,5 +1,4 @@
 use axum::{ Router, routing::post };
-
 use crate::app::AppState;
 
 pub fn create_router() -> Router<AppState> {
