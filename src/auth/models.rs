@@ -28,7 +28,7 @@ pub struct AuthResponse {
   pub user: UserResponse,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Claims {
     pub sub: Uuid,
     pub exp: usize,

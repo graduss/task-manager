@@ -29,3 +29,22 @@ pub struct CreateTaskRequest {
   pub title: String,
   pub description: Option<String>,
 }
+
+/// Query parameters for listing tasks, with optional filters and pagination.
+#[derive(Deserialize, Validate)]
+pub struct TasksQuery {
+  pub status: Option<TaskStatus>,
+  pub search: Option<String>,
+  #[validate(range(min = 0, message = "Page must be a non-negative integer"))]
+  pub page: i32,
+  #[validate(range(min = 1, max = 100, message = "Page size must be between 1 and 100"))]
+  pub page_size: i32,
+}
+
+#[derive(Serialize)]
+pub struct TasksResponse {
+  pub tasks: Vec<Task>,
+  pub page: u32,
+  pub page_size: u32,
+  pub has_next: bool,
+}

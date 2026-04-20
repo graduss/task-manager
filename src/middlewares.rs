@@ -19,7 +19,6 @@ use crate::{
 /// then injects the resolved [`UserResponse`] as a request extension.
 /// Returns `401 Unauthorized` if the token is missing, invalid, or the user no longer exists.
 pub async fn get_current_user(
-  State(app_state): State<AppState>,
   mut req: Request,
   next: Next,
 ) -> Result<Response, AppError> {
@@ -32,11 +31,8 @@ pub async fn get_current_user(
     .ok_or(AppError::Unauthorized)?;
 
   let claims = decode_jwt(token).map_err(|_| AppError::Unauthorized)?;
-  let user: UserResponse = find_user_by_id(&app_state.db_pool, claims.sub).await?
-    .ok_or(AppError::Unauthorized)?
-    .into();
 
-  req.extensions_mut().insert(user);
+  req.extensions_mut().insert(claims);
 
   Ok(next.run(req).await)
 }

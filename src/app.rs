@@ -16,7 +16,7 @@ pub struct AppState {
 pub fn create_app(app_state: AppState) -> Router {
     Router::new()
     .nest("/api", auth::router::create_router())
-    .nest("/api", user::router::create_router(&app_state))
-    .nest("/api", task::router::create_router(&app_state))
+    .nest("/api", user::router::create_router())
+    .nest("/api", task::router::create_router())
     .with_state(app_state)
 }

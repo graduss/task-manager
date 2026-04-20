@@ -21,7 +21,7 @@ pub struct NewUser {
   pub password_hash: String,
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Serialize)]
 pub struct UserResponse {
   pub id: Uuid,
   pub username: String,

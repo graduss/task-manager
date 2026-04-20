@@ -5,6 +5,7 @@
 use axum::{
   http::StatusCode,
   response::{IntoResponse, Response},
+  extract::rejection::QueryRejection,
   Json,
 };
 use thiserror::Error;
@@ -23,6 +24,9 @@ pub enum AppError {
   #[error("BadRequest: {0}")]
   BadRequest(String),
 
+  #[error("ValidationError: {0}")]
+  ValidationError(#[from] validator::ValidationErrors),
+
   #[error("InternalServerError: {0}")]
   InternalServerError(#[from] anyhow::Error),
 
@@ -38,6 +42,10 @@ impl IntoResponse for AppError {
       AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized".into()),
       AppError::Conflict(message) => (StatusCode::CONFLICT, message.clone()),
       AppError::BadRequest(message) => (StatusCode::BAD_REQUEST, message.clone()),
+      AppError::ValidationError(err) => {
+        tracing::error!("Validation error: {:?}", err);
+        (StatusCode::BAD_REQUEST, err.to_string())
+      }
       AppError::InternalServerError(err) => {
         tracing::error!("Internal server error: {err}");
         (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error".into())
@@ -53,10 +61,17 @@ impl IntoResponse for AppError {
   }
 }
 
-impl From<validator::ValidationErrors> for AppError {
-    fn from(e: validator::ValidationErrors) -> Self {
-        AppError::BadRequest(e.to_string())
-    }
+// impl From<validator::ValidationErrors> for AppError {
+//     fn from(e: validator::ValidationErrors) -> Self {
+//         AppError::ValidationError(e)
+//     }
+// }
+
+impl From<QueryRejection> for AppError {
+  fn from(e: QueryRejection) -> Self {
+    tracing::error!("Query extraction error: {:?}", e);
+    AppError::BadRequest(e.to_string())
+  }
 }
 
 pub type AppResult<T> = Result<T, AppError>;

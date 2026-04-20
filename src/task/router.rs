@@ -1,5 +1,5 @@
 use axum::{
-  Router, middleware, routing::post
+  Router, middleware, routing::{ post, get },
 };
 
 use crate::{
@@ -7,11 +7,11 @@ use crate::{
   middlewares,
 };
 
-pub fn create_router(app_state: &AppState) -> Router<AppState> {
+pub fn create_router() -> Router<AppState> {
   Router::new()
     .route(
       "/tasks",
-      post(super::handlers::create_task)
+      post(super::handlers::create_task).get(super::handlers::list_tasks)
     )
-    .layer(middleware::from_fn_with_state(app_state.clone(), middlewares::get_current_user))
+    .layer(middleware::from_fn(middlewares::get_current_user))
 }
