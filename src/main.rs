@@ -8,6 +8,7 @@ mod errors;
 mod user;
 mod middlewares;
 mod task;
+mod common;
 
 use dotenvy::dotenv;
 use anyhow::Result;
