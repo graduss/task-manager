@@ -1,18 +1,26 @@
-use async_trait::async_trait;
-use axum::extract::{ FromRequestParts, Query, Parts };
+use axum::{
+  extract::{ FromRequest, Request },
+  Json,
+};
+use serde::de::DeserializeOwned;
+use validator::Validate;
+
 use crate::errors::AppError;
 
-struct SafeQuery;
+pub struct SafeQuery<T>(pub T);
 
-#[async_trait]
-impl<S> FromRequestParts<S> for SafeQuery
+impl<S, T> FromRequest<S> for SafeQuery<T>
 where
+  T: DeserializeOwned + Validate + Send,
   S: Send + Sync,
 {
   type Rejection = AppError;
 
-  async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
-    let query = Query::<T>::from_request_parts(parts, _state).await?;
-    Ok(SafeQuery)
+  async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+    let Json(query) = Json::<T>::from_request(req, state).await
+      .map_err(|err| {
+        AppError::BadRequest(err.to_string())
+      })?;
+    Ok(SafeQuery(query))
   }
 }
