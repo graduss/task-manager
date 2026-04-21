@@ -48,3 +48,11 @@ pub struct TasksResponse {
   pub page_size: u32,
   pub has_next: bool,
 }
+
+#[derive(Deserialize, Validate)]
+pub struct TaskUpdate {
+  #[validate(length(min = 1, max = 255, message = "Title cannot be empty and must be less than 255 characters"))]
+  pub title: Option<String>,
+  pub description: Option<String>,
+  pub status: Option<TaskStatus>,
+}

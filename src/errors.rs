@@ -12,8 +12,8 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum AppError {
-  #[error("NotFound: {0}")]
-  NotFound(String),
+  #[error("NotFound")]
+  NotFound,
 
   #[error("Unauthorized")]
   Unauthorized,
@@ -38,7 +38,7 @@ impl IntoResponse for AppError {
   /// Maps each error variant to an HTTP status code and a JSON `{ "error": "..." }` body.
   fn into_response(self) -> Response {
     let (status, error_message) = match self {
-      AppError::NotFound(message) => (StatusCode::NOT_FOUND, message.clone()),
+      AppError::NotFound => (StatusCode::NOT_FOUND, "Not Found".into()),
       AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized".into()),
       AppError::Conflict(message) => (StatusCode::CONFLICT, message.clone()),
       AppError::BadRequest(message) => (StatusCode::BAD_REQUEST, message.clone()),
@@ -60,12 +60,6 @@ impl IntoResponse for AppError {
     (status, body).into_response()
   }
 }
-
-// impl From<validator::ValidationErrors> for AppError {
-//     fn from(e: validator::ValidationErrors) -> Self {
-//         AppError::ValidationError(e)
-//     }
-// }
 
 impl From<QueryRejection> for AppError {
   fn from(e: QueryRejection) -> Self {

@@ -6,7 +6,7 @@ use validator::Validate;
 use crate::{
   app::AppState,
   errors::AppResult,
-  common::SafeQuery,
+  common::SafeJson,
 };
 
 use super::models::{
@@ -18,7 +18,7 @@ use super::models::{
 /// `POST /api/auth/register` — validates the request body and registers a new user.
 pub async fn register_user(
   State(app_state): State<AppState>,
-  SafeQuery(payload): SafeQuery<RegisterUserRequest>
+  SafeJson(payload): SafeJson<RegisterUserRequest>
 ) -> AppResult<Json<AuthResponse>> {
   payload.validate()?;
 
@@ -30,7 +30,7 @@ pub async fn register_user(
 /// `POST /api/auth/login` — validates the request body and authenticates an existing user.
 pub async fn login_user(
   State(app_state): State<AppState>,
-  SafeQuery(payload): SafeQuery<LoginUserRequest>
+  SafeJson(payload): SafeJson<LoginUserRequest>
 ) -> AppResult<Json<AuthResponse>> {
   payload.validate()?;
 

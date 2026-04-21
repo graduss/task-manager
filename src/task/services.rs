@@ -1,6 +1,4 @@
-use std::task;
-
-use sqlx::Execute;
+use uuid::Uuid;
 
 use crate::{
   app::AppState,
@@ -13,6 +11,7 @@ use super::models::{
   TaskStatus,
   TasksQuery,
   TasksResponse,
+  TaskUpdate,
 };
 
 pub async fn create_task(
@@ -88,4 +87,83 @@ pub async fn list_tasks(
     page_size: params.page_size as u32,
     has_next,
   })
+}
+
+pub async fn update_task(
+  app_state: AppState,
+  user_id: Uuid,
+  task_id: Uuid,
+  task_update: TaskUpdate,
+) -> Result<Task, AppError> {
+  let task = sqlx::query_as!(
+    Task,
+    r#"
+    UPDATE tasks
+    SET title = COALESCE($1, title),
+        description = COALESCE($2, description),
+        status = COALESCE($3, status),
+        updated_at = NOW()
+    WHERE id = $4 AND user_id = $5
+    RETURNING id, user_id, title, description, status as "status: TaskStatus", created_at, updated_at
+    "#,
+    task_update.title,
+    task_update.description,
+    task_update.status as Option<TaskStatus>,
+    task_id,
+    user_id
+  )
+  .fetch_optional(&app_state.db_pool)
+  .await?;
+
+  match task {
+    Some(task) => Ok(task),
+    None => Err(AppError::NotFound),
+  }
+}
+
+pub async fn get_task(
+  app_state: AppState,
+  user_id: Uuid,
+  task_id: Uuid,
+) -> Result<Task, AppError> {
+  let task = sqlx::query_as!(
+    Task,
+    r#"
+    SELECT id, user_id, title, description, status as "status: TaskStatus", created_at, updated_at
+    FROM tasks
+    WHERE id = $1 AND user_id = $2
+    "#,
+    task_id,
+    user_id
+  )
+  .fetch_optional(&app_state.db_pool)
+  .await?;
+
+  match task {
+    Some(task) => Ok(task),
+    None => Err(AppError::NotFound),
+  }
+}
+
+pub async fn delete_task(
+  app_state: AppState,
+  user_id: Uuid,
+  task_id: Uuid,
+) -> Result<(), AppError> {
+  let result = sqlx::query!(
+    r#"
+    DELETE FROM tasks
+    WHERE id = $1 AND user_id = $2
+    "#,
+    task_id,
+    user_id
+  )
+  .execute(&app_state.db_pool)
+  .await?;
+
+  if result.rows_affected() == 0 {
+    Err(AppError::NotFound)
+  } else {
+    Ok(())
+  }
 }

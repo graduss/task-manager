@@ -3,16 +3,14 @@
 //! [`UserResponse`] extension into the request for downstream handlers.
 
 use axum::{
-  extract::{Request, State},
+  extract::Request,
   middleware::Next,
   response::Response,
 };
 
 use crate::{
-  app::AppState,
   errors::AppError,
   auth::decode_jwt,
-  user::{ find_user_by_id, UserResponse },
 };
 
 /// Middleware that authenticates the request by validating the `Authorization: Bearer` token,
