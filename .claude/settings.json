@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -q '\\.env$' && echo '{\"continue\":false,\"stopReason\":\".env is protected and cannot be modified by Claude\"}' || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -q '\\.env$' && echo '{\"continue\":false,\"stopReason\":\".env is protected and cannot be read by Claude\"}' || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -q '\\.rs$' && cargo check 2>&1 || true",
+            "statusMessage": "Running cargo check..."
+          }
+        ]
+      }
+    ]
+  }
+}
