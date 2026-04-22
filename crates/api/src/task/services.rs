@@ -3,6 +3,9 @@ use uuid::Uuid;
 use crate::{
   app::AppState,
   errors::AppError,
+  event::{
+    models::{ CreateEvent, EventType },
+    services::create_event},
 };
 
 use super::models::{
@@ -19,6 +22,8 @@ pub async fn create_task(
   user_id: uuid::Uuid,
   task: CreateTaskRequest,
 ) -> Result<Task, AppError> {
+  let mut tx = app_state.db_pool.begin().await?;
+
   let task = sqlx::query_as!(
     Task,
     r#"
@@ -30,8 +35,19 @@ pub async fn create_task(
     task.title,
     task.description
   )
-  .fetch_one(&app_state.db_pool)
+  .fetch_one(&mut *tx)
   .await?;
+
+  create_event(
+    &mut tx,
+    CreateEvent {
+      task_id: task.id,
+      event_type: EventType::CreateTask,
+    },
+  ).await
+  .map_err(|e| AppError::DatabaseError(e))?;
+
+  tx.commit().await?;
 
   Ok(task)
 }
@@ -95,6 +111,8 @@ pub async fn update_task(
   task_id: Uuid,
   task_update: TaskUpdate,
 ) -> Result<Task, AppError> {
+  let mut tx = app_state.db_pool.begin().await?;
+
   let task = sqlx::query_as!(
     Task,
     r#"
@@ -112,8 +130,19 @@ pub async fn update_task(
     task_id,
     user_id
   )
-  .fetch_optional(&app_state.db_pool)
+  .fetch_optional(&mut *tx)
   .await?;
+
+  create_event(
+    &mut tx,
+    CreateEvent {
+      task_id,
+      event_type: EventType::UpdateTask,
+    },
+  ).await
+  .map_err(|e| AppError::DatabaseError(e))?;
+
+  tx.commit().await?;
 
   match task {
     Some(task) => Ok(task),
@@ -150,6 +179,8 @@ pub async fn delete_task(
   user_id: Uuid,
   task_id: Uuid,
 ) -> Result<(), AppError> {
+  let mut tx = app_state.db_pool.begin().await?;
+
   let result = sqlx::query!(
     r#"
     DELETE FROM tasks
@@ -158,8 +189,19 @@ pub async fn delete_task(
     task_id,
     user_id
   )
-  .execute(&app_state.db_pool)
+  .execute(&mut *tx)
   .await?;
+
+  create_event(
+    &mut tx,
+    CreateEvent {
+      task_id,
+      event_type: EventType::DeleteTask,
+    },
+  ).await
+  .map_err(|e| AppError::DatabaseError(e))?;
+
+  tx.commit().await?;
 
   if result.rows_affected() == 0 {
     Err(AppError::NotFound)

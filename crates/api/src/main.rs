@@ -2,7 +2,6 @@
 //! creates the database pool, attaches middleware, and starts the HTTP listener.
 
 mod app;
-mod db;
 mod auth;
 mod errors;
 mod user;
@@ -14,6 +13,9 @@ use dotenvy::dotenv;
 use anyhow::Result;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
+
+use common_core::db;
+use common_core::event;
 
 #[tokio::main]
 async fn main() -> Result<()> {
